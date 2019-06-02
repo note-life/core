@@ -1,0 +1,44 @@
+{
+  "name": "@note-life/core",
+  "version": "0.0.1",
+  "description": "note-life core",
+  "main": "index.js",
+  "dependencies": {
+    "esm": "^3.2.25",
+    "identicon.js": "^2.3.3",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.7.0",
+    "koa-body": "^4.1.0",
+    "koa-logger": "^3.2.0",
+    "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
+    "mongoose": "^5.5.7",
+    "node-schedule": "^1.3.2",
+    "nodemailer": "^6.1.1",
+    "qiniu": "^7.2.1",
+    "sharp": "^0.22.1",
+    "yaml": "^1.6.0"
+  },
+  "devDependencies": {
+    "pm2": "^3.5.1"
+  },
+  "scripts": {
+    "start": "NODE_ENV=production pm2 start --name note.life.core --node-args=\"-r esm\" index.js",
+    "del": "pm2 delete note.life.core",
+    "dev": "NODE_ENV=development node -r esm index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/note-life/core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/note-life/core.git"
+  },
+  "homepage": "https://github.com/note-life/core.git#readme",
+  "keywords": [
+    "note.life"
+  ],
+  "author": "hxtao",
+  "license": "MIT"
+}

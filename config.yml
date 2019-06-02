@@ -1,0 +1,35 @@
+
+# 数据库配置
+db_user: your_db_username
+db_pass: your_db_password
+db_host: 127.0.0.1
+db_port: 27017
+db_name: note_life
+
+# 启服务时指定的域名 默认 127.0.0.1 即可 ( eg: 0.0.0.0 | 127.0.0.1 | 192.168.1.10 ...)
+bind_ip: 127.0.0.1
+
+# 启服务时指定的端口 默认 4533
+bind_port: 4533
+
+# 公网访问的域名
+bind_domain: note.life.com
+
+# 静态资源路径，默认 ./public 不用动; 如需指定其它，必须是绝对路径，
+public_path: ./public
+
+# 代理设置, 通过 nginx 转发时设置为 true
+proxy_pass: true
+
+# 是否启用 https, 生产环境推荐 nginx 层做掉 
+https: false
+
+# 是否启用 http2 (@todo)
+http2: false
+
+# 证书配置 默认 ssl 目录下，其它最好是完成的绝对路径
+ssl_certificate: ./ssl/cert.pem
+ssl_certificate_key: ./ssl/key.pem
+
+# https 服务端口
+ssl_bind_port: 4534
