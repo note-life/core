@@ -14,7 +14,8 @@
 ## 配置文件
 
 ```yml
-# 数据库配置
+# 数据库配置 db_auth 设置为 false 时会忽略 db_user db_pass
+db_auth: true
 db_user: your_db_username
 db_pass: your_db_password
 db_host: 127.0.0.1
