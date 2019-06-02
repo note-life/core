@@ -25,14 +25,15 @@ let mongooseConnected = false;
  * @returns 
  */
 function _connPath(option) {
-    const { username, password, host, port, name } = option;
-    let auth = '';
+    const { auth, username, password, host, port, name } = option;
 
-    if(username && password) {
-        auth = `${username}:${password}@`;
+    let authStr = '';
+
+    if(auth) {
+        authStr = `${username}:${password}@`;
     }
 
-    return `mongodb://${auth}${host}:${port}/${name}`;
+    return `mongodb://${authStr}${host}:${port}/${name}`;
 }
 
 /**
@@ -40,6 +41,7 @@ function _connPath(option) {
  */
 async function connectToMongoose (ctx, next) {
     const config = {
+        auth: CONFIG.db_auth,
         username: CONFIG.db_user,
         password: CONFIG.db_pass,
         host: CONFIG.db_host,
