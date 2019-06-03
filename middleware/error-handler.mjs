@@ -37,9 +37,12 @@ const errorHandler = async function (ctx, next) {
         }
 
         if (errName === 'CastError') {
-            errStatus = 404;
-            errType = 'resource_error';
-            errMsg = `no such record: ${err.path}=${err.value}`;
+            // errStatus = 404;
+            // errType = 'resource_error';
+            // errMsg = `no such record: ${err.path}=${err.value}`;
+            errStatus = 400;
+            errType = 'cast_error';
+            errMsg = err.message;
         }
 
         if (errName === 'ReferenceError') {
