@@ -24,7 +24,7 @@
   "scripts": {
     "start": "NODE_ENV=production pm2 start --name note.life.core index.js",
     "del": "pm2 delete note.life.core",
-    "dev": "NODE_ENV=development node index.js",
+    "dev": "NODE_ENV=development node --inspect index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bugs": {
