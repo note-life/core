@@ -1,19 +1,19 @@
-import fs from 'fs';
-import path from 'path';
-import http from 'http';
-import https from 'https';
-import Koa from 'koa';
-import koaBody from 'koa-body';
-import KoaStatic from 'koa-static';
-import logger from 'koa-logger';
-import schedule from 'node-schedule';
-import cors from './middleware/cors';
-import errorHandler from './middleware/error-handler';
-import blacklist from './middleware/black-list';
-import router from './routes';
-import backup from './scripts/backup';
-import { connectToMongoose, tokenSecret } from './utils';
-import CONFIG from './config';
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+const https = require('https');
+const Koa = require('koa');
+const koaBody = require('koa-body');
+const KoaStatic = require('koa-static');
+const logger = require('koa-logger');
+const schedule = require('node-schedule');
+const cors = require('./middleware/cors');
+const errorHandler = require('./middleware/error-handler');
+const blacklist = require('./middleware/black-list');
+const router = require('./routes');
+const backup = require('./scripts/backup');
+const { connectToMongoose, tokenSecret } = require('./utils');
+const CONFIG = require('./config');
 
 const app = new Koa();
 
