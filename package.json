@@ -4,7 +4,6 @@
   "description": "note-life core",
   "main": "index.js",
   "dependencies": {
-    "esm": "^3.2.25",
     "identicon.js": "^2.3.3",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.7.0",
@@ -23,9 +22,9 @@
     "pm2": "^3.5.1"
   },
   "scripts": {
-    "start": "NODE_ENV=production pm2 start --name note.life.core --node-args=\"-r esm\" index.js",
+    "start": "NODE_ENV=production pm2 start --name note.life.core index.js",
     "del": "pm2 delete note.life.core",
-    "dev": "NODE_ENV=development node -r esm index.js",
+    "dev": "NODE_ENV=development node --inspect index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bugs": {
