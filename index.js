@@ -27,7 +27,7 @@ app.context.verificationCodes = [];
 app.proxy = true;
 
 app.use(async (ctx, next) => {
-    ctx.set('Powered-By', 'node.life');
+    ctx.set('Powered-By', 'note.life');
     await next();
 });
 app.use(errorHandler);
