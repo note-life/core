@@ -48,7 +48,7 @@ async function edit (ctx, next) {
     const noteId = ctx.params.id;
     const note = ctx.request.body;
     const updatedData = {};
-    const modifiedFields = ['title', 'content', 'summary', 'coverImg', 'tags', 'archive', 'darft', 'private', 'deleted'];
+    const modifiedFields = ['title', 'content', 'summary', 'coverImg', 'tags', 'archive', 'draft', 'private', 'deleted'];
 
     const noteStored = await noteModel.findById(noteId);
 
