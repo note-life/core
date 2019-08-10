@@ -65,7 +65,9 @@ async function edit (ctx, next) {
         updatedData[key] = note[key];
     });
 
-    updatedData.updateTime = Date.now();
+    if ((note.content !== undefined && noteStored.content !== note.content) || (note.title !== undefined && noteStored.title !== note.title)) {
+        updatedData.updateTime = Date.now();
+    }
 
     await noteModel.update({ _id: noteId }, updatedData);
 
