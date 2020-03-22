@@ -145,7 +145,7 @@ async function get (ctx, next) {
         queryData.private = false;
         queryData.draft = false;
         queryData.deleted = false;
-        selectedOptions = { private: 0, draft: 0, deleted: 0 };
+        selectedOptions = { private: 0, draft: 0, deleted: 0, content: 0 };
     }
 
     // 私密的 note 记录只能 author 本人才能获取
