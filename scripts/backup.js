@@ -49,7 +49,7 @@ module.exports = backup;
 ## 解压
 
 ```bash
-tar -tf <filename>.tar.gz
+tar -zxvf <filename>.tar.gz
 ```
 
 ## 恢复

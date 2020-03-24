@@ -15,14 +15,15 @@
     "node-schedule": "^1.3.2",
     "nodemailer": "^6.1.1",
     "qiniu": "^7.2.1",
-    "sharp": "^0.22.1",
+    "sharp": "^0.25.2",
     "yaml": "^1.6.0"
   },
   "devDependencies": {
     "pm2": "^3.5.1"
   },
   "scripts": {
-    "start": "NODE_ENV=production pm2 start --name note.life.core index.js",
+    "start-no-daemon": "NODE_ENV=production npx pm2 start --name note.life.core index.js --no-daemon",
+    "start": "NODE_ENV=production npx pm2 start --name note.life.core index.js",
     "del": "pm2 delete note.life.core",
     "dev": "NODE_ENV=development node --inspect index.js ",
     "test": "echo \"Error: no test specified\" && exit 1"
