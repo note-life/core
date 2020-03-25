@@ -83,6 +83,12 @@ router.post('/', async (ctx) => {
                 const readStream = fs.createReadStream(filePath);
                 const writeStream = fs.createWriteStream(output + '.' + fileType.split('/')[1]);
 
+                const dirPath =  `${CONFIG.public_path}/${dirName}`;
+
+                if (!fs.existsSync(dirPath)) {
+                    fs.mkdirSync(dirPath);
+                }
+
                 readStream.pipe(writeStream);
             } else {
                 await compressAndConvertImages(filePath, output);
