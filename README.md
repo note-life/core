@@ -73,6 +73,14 @@ npm i -g pm2
 npm start
 ```
 
+## Run in docker
+
+<https://hub.docker.com/repository/docker/hxtao1996/note-api>
+
+```bash
+docker push hxtao1996/note-api:0.0.1
+```
+
 ## API Doc
 
 - [setup](./doc/setup.md)  初始化
