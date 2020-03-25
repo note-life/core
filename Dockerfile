@@ -8,4 +8,6 @@ RUN npm i
 
 COPY . /app
 
+EXPOSE 4533
+
 CMD [ "npm", "run", "start-no-daemon" ]
