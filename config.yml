@@ -2,14 +2,14 @@
 db_auth: true
 db_user: your_db_username
 db_pass: your_db_password
-db_host: 127.0.0.1
+db_host: 127.0.0.1  ## docker 下请配置对应的 mongo host
 db_port: 27017
 db_name: note_life
 
 # 启服务时指定的域名 默认 127.0.0.1 即可 ( eg: 0.0.0.0 | 127.0.0.1 | 192.168.1.10 ...)
 bind_ip: 127.0.0.1
 
-# 启服务时指定的端口 默认 4533
+# 启服务时指定的端口 默认 4533 (docker 暂下不支持配置)
 bind_port: 4533
 
 # 公网访问的域名
@@ -31,5 +31,5 @@ http2: false
 ssl_certificate: ./ssl/cert.pem
 ssl_certificate_key: ./ssl/key.pem
 
-# https 服务端口
+# https 服务端口 (docker 暂下不支持配置)
 ssl_bind_port: 4534
