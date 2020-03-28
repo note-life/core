@@ -48,9 +48,10 @@ const saveToQiniu = async (input, output, fileType, options) => {
         const resizeOptions = { width: 1024, withoutEnlargement: true };
 
         const p1 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).webp({ quality: 75 }), `${output}.webp`);
-        const p2 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).jpeg({ quality: 75, progressive: true }), `${output}.jpeg`);
+        const p2 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).jpeg({ quality: 75, progressive: true } ), `${output}.jpeg`);
+        const p3 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).png({ quality: 75 } ), `${output}.png`);
 
-        return Promise.all([p1, p2]);
+        return Promise.all([p1, p2, p3]);
     } else {
         qiniuUploader.readAndUpload(fs.createReadStream(input, output + '.' + fileType.split('/')[1]));
     }
