@@ -33,7 +33,7 @@ function backup () {
     const dirName = `${date.getFullYear()}_${num(date.getMonth() + 1)}_${num(date.getDate())}_${num(date.getHours())}${num(date.getMinutes())}${num(date.getSeconds())}`;
     const backupPath = `./.backup/${dirName}`;
     const tarFile = `${dirName}.tar.gz`;
-    const command = `mongodump -h 127.0.0.1 -d ${CONFIG.db_name} -o ${backupPath} && tar -zcvf ${tarFile} ${backupPath} && mv ${tarFile} ./.backup && rm -rf ${backupPath}`;
+    const command = `mongodump -h ${CONFIG.db_host} -d ${CONFIG.db_name} -o ${backupPath} && tar -zcvf ${tarFile} ${backupPath} && mv ${tarFile} ./.backup && rm -rf ${backupPath}`;
 
     exec(command, (err, stdout, stderr) => {
         if (err) {

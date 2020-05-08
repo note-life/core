@@ -142,13 +142,13 @@ async function get (ctx, next) {
 
 
     if (signinedUser) {
-        if (!(queryData.author === signinedUser._id || signinedUser.permissions.includes('admin'))) {
-            queryData.private = false;
-        }
-
         // 只能查询自己的私密文章
         if (queryData.private) {
             queryData.author = signinedUser._id;
+        }
+
+        if (!(queryData.author === signinedUser._id || signinedUser.permissions.includes('admin'))) {
+            queryData.private = false;
         }
 
         selectedOptions = { content: 0, summary: 0 };
