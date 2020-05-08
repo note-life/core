@@ -1,6 +1,6 @@
 {
   "name": "@note-life/core",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "note-life core",
   "main": "index.js",
   "dependencies": {

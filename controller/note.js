@@ -146,6 +146,11 @@ async function get (ctx, next) {
             queryData.private = false;
         }
 
+        // 只能查询自己的私密文章
+        if (queryData.private) {
+            queryData.author = signinedUser._id;
+        }
+
         selectedOptions = { content: 0, summary: 0 };
     } else {
         queryData.private = false;
