@@ -140,21 +140,18 @@ async function get (ctx, next) {
         }
     });
 
-    // 非后台用户（普通访客）只能获取公开 note && 隐藏一些关键信息的字段（private, draft, deleted）
-    if (!signinedUser) {
+
+    if (signinedUser) {
+        if (!(queryData.author === signinedUser._id || signinedUser.permissions.includes('admin'))) {
+            queryData.private = false;
+        }
+
+        selectedOptions = { content: 0, summary: 0 };
+    } else {
         queryData.private = false;
         queryData.draft = false;
         queryData.deleted = false;
         selectedOptions = { private: 0, draft: 0, deleted: 0, content: 0 };
-    }
-
-    // 私密的 note 记录只能 author 本人才能获取
-    if (signinedUser && queryData.private) {
-        queryData.author = signinedUser._id;
-    }
-
-    if (queryData.draft || queryData.public) {
-        queryData.private = false;
     }
 
     ctx.body = {
