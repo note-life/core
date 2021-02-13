@@ -21,7 +21,9 @@
     "yaml": "^1.8.3"
   },
   "devDependencies": {
-    "pm2": "^4.2.3"
+    "bufferutil": "^4.0.3",
+    "pm2": "^4.2.3",
+    "utf-8-validate": "^5.0.4"
   },
   "scripts": {
     "start-no-daemon": "NODE_ENV=production npx pm2 start --name note.life.core index.js --no-daemon",
