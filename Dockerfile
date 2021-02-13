@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY ./package.json /app/package.json
 
-RUN npm i
+RUN npm i  --registry=https://registry.npm.taobao.org
 
 COPY . /app
 
