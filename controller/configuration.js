@@ -1,7 +1,7 @@
 const configurationModel = require('../model/configuration');
 
-const FREEZE_CONFIGUARTIONS = ['EMAIL', 'QINIU_OSS', 'SITE_INFO', 'TAG', 'ARCHIVE', 'CATEGORY'];
-const PRIVATE_CONFIGUARTIONS = ['EMAIL', 'QINIU_OSS'];
+const FREEZE_CONFIGUARTIONS = ['EMAIL', 'OSS', 'SITE_INFO', 'TAG', 'ARCHIVE', 'CATEGORY'];
+const PRIVATE_CONFIGUARTIONS = ['EMAIL', 'OSS'];
 
 /**
  * 创建
@@ -38,10 +38,11 @@ async function create (ctx, next) {
         configuration.private = true;
     }
 
-    // 七牛配置信息
-    if (configuration.key === 'QINIU_OSS') {
+    // 对象储存 配置信息
+    if (configuration.key === 'OSS') {
         const { options } = configuration;
-        const neededFields = ['accessKey', 'secretKey', 'scope', 'domain'];
+        // const neededFields = ['accessKey', 'secretKey', 'scope', 'domain'];
+        const neededFields = []
 
         neededFields.forEach((field) => {
             if (!options[field]) {
@@ -174,7 +175,7 @@ async function get (ctx, next) {
         .populate('creator', '_id nickname avator')
         .populate('editor', '_id nickname avator');
 
-    ctx.body = data.filter(v => !(v.private && v.creator._id != signinedUser._id));
+    ctx.body = data.find(v => !(v.private && v.creator._id != signinedUser._id)) || {};
 }
 
 /**

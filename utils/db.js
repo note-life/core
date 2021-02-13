@@ -65,7 +65,7 @@ async function connectToMongoose (ctx, next) {
     }
 
     await Mongoose.connection.close();
-    await Mongoose.connect(_connPath(config), { useNewUrlParser: true });
+    await Mongoose.connect(_connPath(config), { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
     mongooseConnected = true;
     await next();
 }

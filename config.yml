@@ -1,5 +1,5 @@
 # 数据库配置 db_auth 设置为 false 时会忽略 db_user db_pass
-db_auth: true
+db_auth: false
 db_user: your_db_username
 db_pass: your_db_password
 db_host: 127.0.0.1  ## docker 下请配置对应的 mongo host

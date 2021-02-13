@@ -1,8 +1,4 @@
 node_modules
 *.pem
-public/images/*.jpg
-public/images/*.jpeg
-public/images/*.png
-public/images/*.gif
-public/images/*.webp
-public/images/*.svg
+public
+.DS_Store

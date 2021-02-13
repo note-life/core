@@ -1,12 +1,32 @@
 const fs = require('fs');
 const Router = require('koa-router');
 const sharp = require('sharp');
+const sizeOf = require('image-size');
+const ALiOSS = require('ali-oss');
 const MD5 = require('../utils/md5');
 const configurationModel = require('../model/configuration');
 const QiniuUploader = require('../utils/qiniu-uploader');
 const CONFIG = require('../config');
 
 const router = new Router();
+
+/**
+ * 路径检测 不存在则创建一个
+ * @param {String} dirpath 
+ */
+const dirPathCheck = (dirpath) => {
+    let targetPath = CONFIG.public_path;
+
+    dirpath.split('/').forEach(v => {
+        targetPath += `/${v}`;
+
+        if (!fs.existsSync(targetPath)) {
+            fs.mkdirSync(targetPath);
+        }
+    });
+
+    return targetPath;
+};
 
 const filterDirName = (type) => {
     if (/^image/.test(type)) return 'images';
@@ -20,87 +40,152 @@ const filterDirName = (type) => {
     return 'files';
 };
 
+
 /**
- * 本地储存
- * @param input
- * @param output
+ * 上传到阿里云对象储存
+ * @param {Stream} inputFileStream 
+ * @param {String} ossFilePath 
  */
-const compressAndConvertImages = async (input, output) => {
-    const resizeOptions = { width: 1024, withoutEnlargement: true };
+const saveToAliOSS = async (data, config) => {
+    const ossClient = new ALiOSS({
+        region: config.region,
+        accessKeyId: config.accessKeyId,
+        accessKeySecret: config.accessKeySecret,
+        bucket: config.bucket
+    });
 
-    const p1 = sharp(input).resize(resizeOptions).webp({ quality: 75 }).toFile(output + '.webp');
-    const p2 = sharp(input).resize(resizeOptions).jpeg({ quality: 75, progressive: true }).toFile(output + '.jpeg');
+    const p = [];
 
-    return Promise.all([p1, p2]);
+    data.forEach(([inputFileStream, ossFilePath]) => {
+        const result = ossClient.putStream(ossFilePath, inputFileStream, {
+            headers: {
+                'Cache-Control': 2592000
+            }
+        });
+
+        p.push(result);
+    });
+
+    return Promise.all(p);
 };
 
 /**
  * 上传到七牛云
- * @param input
- * @param output
- * @param fileType
- * @param options
  */
-const saveToQiniu = async (input, output, fileType, options) => {
-    const qiniuUploader = new QiniuUploader(options);
+const saveToQiniu = async (data, config) => {
+    const qiniuUploader = new QiniuUploader(config);
+    const p = [];
 
-    if (/image/.test(fileType)) {
-        const resizeOptions = { width: 1024, withoutEnlargement: true };
+    data.forEach(([inputFileStream, ossFilePath]) => {
+        const result = qiniuUploader.readAndUpload(inputFileStream, ossFilePath);
 
-        const p1 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).webp({ quality: 75 }), `${output}.webp`);
-        const p2 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).jpeg({ quality: 75, progressive: true } ), `${output}.jpeg`);
-        // const p3 = qiniuUploader.readAndUpload(sharp(input).resize(resizeOptions).png({ quality: 75 } ), `${output}.png`);
+        p.push(result);
+    });
 
-        return Promise.all([p1, p2]);
+    return Promise.all(p);
+};
+
+const handleFile = async ({ type, path, name }, ossConfig, dateDirName) => {
+    const relativePath = `${filterDirName(type)}/${dateDirName}`;
+    const baseOutputPath = dirPathCheck(relativePath);
+    const fileExt = name.split('.').pop();
+    const isWebAvariableImage = /image\/(gif|jpg|jpeg|apng|png|webp|avif|svg)/.test(type);
+    const imgSize = {};
+
+    let fileName;
+    let originFileName;
+
+    // 名称二次处理
+    if (isWebAvariableImage) {
+        const { width, height } = sizeOf(path);
+        const typeEnum = {
+            gif: 'z1',
+            jpg: 'z2',
+            jpeg: 'z3',
+            apng: 'z4',
+            png: 'z5',
+            webp: 'z6',
+            avif: 'z7',
+            svg: 'z8'
+        };
+
+        const randomstr = MD5.random(8);
+
+        fileName = `${randomstr}${typeEnum[fileExt]}_w${width}h${height}`;
+        originFileName = `${randomstr}_w${width}h${height}`;
+        imgSize.width = width;
+        imgSize.height = height;
     } else {
-        qiniuUploader.readAndUpload(fs.createReadStream(input, output + '.' + fileType.split('/')[1]));
+        originFileName = fileName = `${name.slice(0, -fileExt.length - 1).replace(/(\s|\/)/g, '_')}_${Date.now()}`
     }
+
+    const originOutputPath = `${baseOutputPath}/${originFileName}.${fileExt}`;
+
+    const ossActionEnum = {
+        'ali-oss': saveToAliOSS,
+        'qiniu-oss': saveToQiniu
+    };
+    const ossAction = ossConfig ? ossActionEnum[ossConfig.type] : null;
+
+    // 存入对象储存
+    if (ossConfig && ossAction) {
+        if (isWebAvariableImage) {
+            const resizeOptions = { width: Math.min(imgSize.width, 1024), withoutEnlargement: true };
+            const data = [
+                [fs.createReadStream(path), `images/${dateDirName}/${originFileName}.${fileExt}`],
+                [sharp(path).resize(20).png(), `thumbnails/${dateDirName}/${fileName}.png`],
+                [sharp(path).resize(20).webp(), `thumbnails/${dateDirName}/${fileName}.webp`],
+                [sharp(path).resize(resizeOptions).png({ adaptiveFiltering: true, pallete: true, quality: 8, dither: 1 }), `images/${dateDirName}/${fileName}.png`],
+                [sharp(path).resize(resizeOptions).webp(), `images/${dateDirName}/${fileName}.webp`]
+            ];
+
+            await ossAction(data, ossConfig);
+        } else {
+            const data = [
+                [fs.createReadStream(path), `${relativePath}/${fileName}.${fileExt}`]
+            ];
+
+            await ossAction(data, ossConfig);
+        }
+    } else {
+        const readStream = fs.createReadStream(path);
+        const writeStream = fs.createWriteStream(originOutputPath);
+
+        if (isWebAvariableImage) {
+            const thumbnailDirPath = dirPathCheck(`/thumbnails/${dateDirName}`);
+            const resizeOptions = { width: Math.min(imgSize.width, 1024), withoutEnlargement: true };
+
+            sharp(path).resize(20).toFormat('png').toFile(`${thumbnailDirPath}/${fileName}.png`);
+            sharp(path).resize(resizeOptions).png({ adaptiveFiltering: true, pallete: true, quality: 8, dither: 1 }).toFile(`${baseOutputPath}/${fileName}.png`);
+            sharp(path).resize(resizeOptions).webp().toFile(`${baseOutputPath}/${fileName}.webp`);
+        }
+
+        readStream.pipe(writeStream);
+    }
+
+    return `${relativePath}/${fileName}.${isWebAvariableImage ? 'png' : fileExt}`;
 };
 
 router.post('/', async (ctx) => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, 0);
     const { files = {} } = ctx.request;
-    const publicPaths = [];
     const filesArr = Object.values(files);
-    const qiniuOSSConfiguration = await configurationModel.findOne({ key: 'QINIU_OSS' }) || {};
-    const OSS_DOMAIN = qiniuOSSConfiguration.enabled && qiniuOSSConfiguration.options && qiniuOSSConfiguration.options.domain;
-    const validQiniu = qiniuOSSConfiguration.enabled && qiniuOSSConfiguration.options && qiniuOSSConfiguration.options.accessKey && qiniuOSSConfiguration.options.secretKey && qiniuOSSConfiguration.options.scope;
+    const OSSConfiguration = await configurationModel.findOne({ key: 'OSS' });
+    const activeOss = (OSSConfiguration.enabled && OSSConfiguration.options) ? OSSConfiguration.options.list.find(v => v.type === OSSConfiguration.options.active) : null;
+    const dateDirName = `${year}${month}`;
+    const p = [];
 
     // 批量上传
     for (let i = 0; i < filesArr.length; i++) {
-        const fileSize = filesArr[i].size;
-        const fileType = filesArr[i].type;
-        const filePath = filesArr[i].path;
-
-        const dirName = filterDirName(fileType);
-        const baseFilePath = `${dirName}/${MD5.random(12)}`;
-        const output = `${CONFIG.public_path}/${baseFilePath}`;
-
-        if (validQiniu) {
-            await saveToQiniu(filePath, baseFilePath, fileType, qiniuOSSConfiguration.options);
-        } else {
-            // gif 或 非图片直接保存 否则压缩处理
-            // webp 也是支持动态的 这个吗慢慢研究 偷个懒先
-            if (!/image/.test(fileType) || /(gif|ico)/.test(fileType)) {
-                const readStream = fs.createReadStream(filePath);
-                const writeStream = fs.createWriteStream(output + '.' + fileType.split('/')[1]);
-
-                const dirPath =  `${CONFIG.public_path}/${dirName}`;
-
-                if (!fs.existsSync(dirPath)) {
-                    fs.mkdirSync(dirPath);
-                }
-
-                readStream.pipe(writeStream);
-            } else {
-                await compressAndConvertImages(filePath, output);
-            }
-        }
-
-        publicPaths.push(baseFilePath);
+        p.push(handleFile(filesArr[i], activeOss, dateDirName));
     }
 
+    const publicPaths = await Promise.all(p);
+
     ctx.body = {
-        host: OSS_DOMAIN ? OSS_DOMAIN : CONFIG.bind_domain,
+        host: (activeOss && activeOss.domain) ? activeOss.domain : CONFIG.bind_domain,
         paths: publicPaths
     };
 });
